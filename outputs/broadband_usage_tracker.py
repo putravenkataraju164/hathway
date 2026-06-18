@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import gzip
 import http.client
 import html
 import json
@@ -20,6 +21,7 @@ import ssl
 import sys
 import time
 import urllib.parse
+import zlib
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from zoneinfo import ZoneInfo
@@ -642,21 +644,26 @@ def post_hathway_usage(auth_config: Dict[str, str], timeout: int) -> Tuple[int, 
     headers = {
         "Host": host,
         "Authorization": auth_config["authorization"],
-        "Accept": "application/json, text/plain, */*",
-        "Accept-Encoding": "identity",
-        "Content-Type": "application/json",
-        "Content-Length": str(len(payload_bytes)),
-        "Origin": "https://ispselfcare.hathway.net",
-        "Referer": "https://ispselfcare.hathway.net/",
-        "DNT": "1",
-        "Connection": "close",
-        "Sec-Fetch-Site": "same-site",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Dest": "empty",
+        "Sec-CH-UA-Platform": '"macOS"',
+        "Sec-CH-UA": '"Google Chrome";v="149", "Chromium";v="149", "Not)A;Brand";v="24"',
+        "Sec-CH-UA-Mobile": "?0",
         "User-Agent": (
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
         ),
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept-Language": "en-US,en;q=0.9,ne;q=0.8,kn;q=0.7",
+        "Content-Type": "application/json",
+        "Content-Length": str(len(payload_bytes)),
+        "Origin": "https://ispselfcare.hathway.net",
+        "DNT": "1",
+        "Sec-Fetch-Site": "same-site",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Dest": "empty",
+        "Referer": "https://ispselfcare.hathway.net/",
+        "Priority": "u=1, i",
+        "Connection": "close",
     }
 
     context = ssl.create_default_context()
@@ -670,7 +677,13 @@ def post_hathway_usage(auth_config: Dict[str, str], timeout: int) -> Tuple[int, 
     try:
         connection.request("POST", path, body=payload_bytes, headers=headers)
         response = connection.getresponse()
-        raw_text = response.read().decode("utf-8", errors="replace")
+        raw_body = response.read()
+        content_encoding = (response.getheader("Content-Encoding") or "").lower()
+        if "gzip" in content_encoding:
+            raw_body = gzip.decompress(raw_body)
+        elif "deflate" in content_encoding:
+            raw_body = zlib.decompress(raw_body)
+        raw_text = raw_body.decode("utf-8", errors="replace")
         status_code = int(response.status)
     finally:
         connection.close()
