@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hathway Broadband Usage</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --ink: #182230;
+      --muted: #667085;
+      --line: #d7dee9;
+      --blue: #2563eb;
+      --teal: #0f766e;
+      --orange: #f97316;
+      --rose: #e11d48;
+      --green: #16a34a;
+      --shadow: 0 18px 50px rgba(16, 24, 40, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #e9f4ff 0, #f7faf9 24rem, var(--bg) 24rem);
+    }
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding: 24px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #101828 0%, #164e63 52%, #0f766e 100%);
+      color: #ffffff;
+      box-shadow: var(--shadow);
+    }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #a7f3d0;
+      font-size: 0.78rem;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 6vw, 4.1rem);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+    .subhead {
+      margin: 0;
+      color: #dbeafe;
+      font-size: 1rem;
+      line-height: 1.5;
+      max-width: 780px;
+      overflow-wrap: anywhere;
+    }
+    .status {
+      min-width: 260px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .status b {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      background: #22c55e;
+    }
+    .bad .dot { background: #fb7185; }
+    .status span {
+      display: block;
+      margin-top: 8px;
+      color: #dbeafe;
+      font-size: 0.92rem;
+      overflow-wrap: anywhere;
+    }
+    .period-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      margin: 20px 0;
+    }
+    .period-card {
+      min-height: 170px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-top: 5px solid var(--accent, var(--blue));
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .period-card span {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+    .period-card strong {
+      display: block;
+      margin-top: 12px;
+      font-size: clamp(1.55rem, 4vw, 2.35rem);
+      line-height: 1.02;
+      overflow-wrap: anywhere;
+    }
+    .period-card small {
+      display: block;
+      min-height: 42px;
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .meter {
+      height: 8px;
+      margin-top: 14px;
+      border-radius: 999px;
+      background: #e8eef5;
+      overflow: hidden;
+    }
+    .meter i {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent, var(--blue));
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 18px 0 24px;
+    }
+    .metric {
+      min-height: 138px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .metric .label {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .metric .value {
+      margin-top: 12px;
+      font-size: clamp(1.45rem, 4vw, 2.35rem);
+      line-height: 1.04;
+      font-weight: 850;
+      overflow-wrap: anywhere;
+    }
+    .metric .hint {
+      margin-top: 11px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      overflow-wrap: anywhere;
+    }
+    .accent-blue { --accent: var(--blue); border-top-color: var(--blue); }
+    .accent-teal { --accent: var(--teal); border-top-color: var(--teal); }
+    .accent-orange { --accent: var(--orange); border-top-color: var(--orange); }
+    .accent-rose { --accent: var(--rose); border-top-color: var(--rose); }
+    .accent-green { --accent: var(--green); border-top-color: var(--green); }
+    .section {
+      margin-top: 18px;
+    }
+    .chart-grid, .split-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .chart-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .split-grid {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    }
+    .chart-panel, .table-panel {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .full-width {
+      grid-column: 1 / -1;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    h2 {
+      margin: 0;
+      font-size: 1.12rem;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+    .chart {
+      width: 100%;
+      overflow: hidden;
+    }
+    .chart svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .swatch.download { background: var(--teal); }
+    .swatch.upload { background: var(--orange); }
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .field-card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+    .field-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .field-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 1.2rem;
+      overflow-wrap: anywhere;
+    }
+    .field-card small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+    .empty {
+      color: var(--muted);
+      padding: 16px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.94rem;
+    }
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+    }
+    tbody tr:last-child td { border-bottom: 0; }
+    details summary {
+      cursor: pointer;
+      color: var(--blue);
+      font-weight: 750;
+    }
+    pre {
+      max-height: 520px;
+      overflow: auto;
+      margin: 16px 0 0;
+      padding: 16px;
+      border-radius: 8px;
+      background: #101828;
+      color: #e0f2fe;
+      font-size: 0.85rem;
+      line-height: 1.55;
+    }
+    footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #e8eef5;
+      color: #344054;
+    }
+    @media (max-width: 920px) {
+      header { grid-template-columns: 1fr; }
+      .status { min-width: 0; }
+      .period-grid, .metric-grid, .chart-grid, .split-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .section-head { display: block; }
+      .note { margin-top: 6px; text-align: left; }
+    }
+    @media (max-width: 560px) {
+      main { width: min(100% - 22px, 1180px); padding-top: 22px; }
+      header { padding: 18px; }
+      .period-grid, .metric-grid, .chart-grid, .split-grid, .field-grid { grid-template-columns: 1fr; }
+      .chart-panel, .table-panel { padding: 14px; }
+      table { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">Hathway usage status</p>
+        <h1>Hathway Broadband Usage</h1>
+        <p class="subhead">2025-12-31T18:30:00.000Z to 2026-06-18T15:08:06.940Z</p>
+      </div>
+      <div class="status good">
+        <b><i class="dot"></i>Ready</b>
+        <span>Last updated: 2026-06-18T20:38:07+05:30</span>
+      </div>
+    </header>
+
+    <section class="period-grid" aria-label="Daily weekly monthly yearly and overall usage">
+      <article class="period-card accent-blue"><span>Latest Day</span><strong>24.8 GB</strong><small>2026-06-16 | Download 20.7 GB | Upload 4.07 GB</small><div class="meter"><i style="width: 4%"></i></div></article>
+<article class="period-card accent-teal"><span>This Week</span><strong>46.7 GB</strong><small>2 days | Avg 23.4 GB/day | Peak 24.8 GB</small><div class="meter"><i style="width: 4%"></i></div></article>
+<article class="period-card accent-orange"><span>This Month</span><strong>263 GB</strong><small>16 days | Avg 16.5 GB/day | Peak 50.9 GB</small><div class="meter"><i style="width: 16%"></i></div></article>
+<article class="period-card accent-rose"><span>This Year</span><strong>1.62 TB</strong><small>101 days | Avg 16.4 GB/day | Peak 102 GB</small><div class="meter"><i style="width: 100%"></i></div></article>
+<article class="period-card accent-green"><span>Overall</span><strong>1.62 TB</strong><small>101 days | Avg 16.4 GB/day | Peak 102 GB</small><div class="meter"><i style="width: 100%"></i></div></article>
+    </section>
+
+    <section class="metric-grid" aria-label="Account and plan details">
+      <article class="metric">
+        <div class="label">Plan</div>
+        <div class="value">Unavailable</div>
+        <div class="hint">Plan field not found</div>
+      </article>
+      <article class="metric">
+        <div class="label">Quota</div>
+        <div class="value">Unavailable</div>
+        <div class="hint">Quota field not found</div>
+      </article>
+      <article class="metric">
+        <div class="label">Speed</div>
+        <div class="value">Unavailable</div>
+        <div class="hint">Speed field not found</div>
+      </article>
+      <article class="metric">
+        <div class="label">Expiry</div>
+        <div class="value">Unavailable</div>
+        <div class="hint">Account ******9102</div>
+      </article>
+    </section>
+
+    <section class="chart-grid" aria-label="Usage charts">
+      <article class="chart-panel full-width">
+        <div class="section-head">
+          <h2>Daily Usage</h2>
+          <div class="note">Last 45 days from the latest API response</div>
+        </div>
+        <div class="chart"><svg viewBox="0 0 920 250" role="img" aria-label="Daily usage chart"><rect width="920" height="250" rx="8" fill="#ffffff"/><line x1="42" y1="18.0" x2="900" y2="18.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="22.0" text-anchor="end" fill="#667085" font-size="11">102 GB</text><line x1="42" y1="80.0" x2="900" y2="80.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="84.0" text-anchor="end" fill="#667085" font-size="11">68.0 GB</text><line x1="42" y1="142.0" x2="900" y2="142.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="146.0" text-anchor="end" fill="#667085" font-size="11">34.0 GB</text><line x1="42" y1="204.0" x2="900" y2="204.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="208.0" text-anchor="end" fill="#667085" font-size="11">0 B</text><line x1="42" y1="204" x2="900" y2="204" stroke="#e5e7eb" stroke-width="1"/><rect x="42.0" y="44.5" width="11.2" height="6.6" rx="4" fill="#f97316"/><rect x="42.0" y="51.1" width="11.2" height="152.9" rx="4" fill="#0f766e"/><text x="47.6" y="232" text-anchor="middle" fill="#667085" font-size="11">05-03</text><rect x="61.2" y="183.2" width="11.2" height="1.6" rx="4" fill="#f97316"/><rect x="61.2" y="184.7" width="11.2" height="19.3" rx="4" fill="#0f766e"/><rect x="80.5" y="134.2" width="11.2" height="4.8" rx="4" fill="#f97316"/><rect x="80.5" y="139.0" width="11.2" height="65.0" rx="4" fill="#0f766e"/><rect x="99.7" y="172.9" width="11.2" height="2.1" rx="4" fill="#f97316"/><rect x="99.7" y="175.0" width="11.2" height="29.0" rx="4" fill="#0f766e"/><rect x="119.0" y="69.2" width="11.2" height="8.9" rx="4" fill="#f97316"/><rect x="119.0" y="78.2" width="11.2" height="125.8" rx="4" fill="#0f766e"/><text x="124.6" y="232" text-anchor="middle" fill="#667085" font-size="11">05-07</text><rect x="138.2" y="63.7" width="11.2" height="5.8" rx="4" fill="#f97316"/><rect x="138.2" y="69.5" width="11.2" height="134.5" rx="4" fill="#0f766e"/><rect x="157.5" y="179.4" width="11.2" height="2.3" rx="4" fill="#f97316"/><rect x="157.5" y="181.7" width="11.2" height="22.3" rx="4" fill="#0f766e"/><rect x="176.7" y="189.7" width="11.2" height="3.8" rx="4" fill="#f97316"/><rect x="176.7" y="193.5" width="11.2" height="10.5" rx="4" fill="#0f766e"/><rect x="196.0" y="181.7" width="11.2" height="7.8" rx="4" fill="#f97316"/><rect x="196.0" y="189.5" width="11.2" height="14.5" rx="4" fill="#0f766e"/><text x="201.6" y="232" text-anchor="middle" fill="#667085" font-size="11">05-11</text><rect x="215.2" y="78.4" width="11.2" height="6.8" rx="4" fill="#f97316"/><rect x="215.2" y="85.2" width="11.2" height="118.8" rx="4" fill="#0f766e"/><rect x="234.4" y="177.8" width="11.2" height="2.8" rx="4" fill="#f97316"/><rect x="234.4" y="180.7" width="11.2" height="23.3" rx="4" fill="#0f766e"/><rect x="253.7" y="18.0" width="11.2" height="12.8" rx="4" fill="#f97316"/><rect x="253.7" y="30.8" width="11.2" height="173.2" rx="4" fill="#0f766e"/><rect x="272.9" y="182.8" width="11.2" height="2.2" rx="4" fill="#f97316"/><rect x="272.9" y="185.0" width="11.2" height="19.0" rx="4" fill="#0f766e"/><text x="278.6" y="232" text-anchor="middle" fill="#667085" font-size="11">05-15</text><rect x="292.2" y="182.5" width="11.2" height="1.3" rx="4" fill="#f97316"/><rect x="292.2" y="183.8" width="11.2" height="20.2" rx="4" fill="#0f766e"/><rect x="311.4" y="173.9" width="11.2" height="5.5" rx="4" fill="#f97316"/><rect x="311.4" y="179.5" width="11.2" height="24.5" rx="4" fill="#0f766e"/><rect x="330.7" y="177.9" width="11.2" height="2.8" rx="4" fill="#f97316"/><rect x="330.7" y="180.8" width="11.2" height="23.2" rx="4" fill="#0f766e"/><rect x="349.9" y="182.8" width="11.2" height="3.3" rx="4" fill="#f97316"/><rect x="349.9" y="186.1" width="11.2" height="17.9" rx="4" fill="#0f766e"/><text x="355.5" y="232" text-anchor="middle" fill="#667085" font-size="11">05-19</text><rect x="369.2" y="181.6" width="11.2" height="2.2" rx="4" fill="#f97316"/><rect x="369.2" y="183.7" width="11.2" height="20.3" rx="4" fill="#0f766e"/><rect x="388.4" y="178.4" width="11.2" height="3.4" rx="4" fill="#f97316"/><rect x="388.4" y="181.7" width="11.2" height="22.3" rx="4" fill="#0f766e"/><rect x="407.6" y="185.4" width="11.2" height="1.9" rx="4" fill="#f97316"/><rect x="407.6" y="187.3" width="11.2" height="16.7" rx="4" fill="#0f766e"/><rect x="426.9" y="181.3" width="11.2" height="2.9" rx="4" fill="#f97316"/><rect x="426.9" y="184.2" width="11.2" height="19.8" rx="4" fill="#0f766e"/><text x="432.5" y="232" text-anchor="middle" fill="#667085" font-size="11">05-23</text><rect x="446.1" y="172.3" width="11.2" height="5.0" rx="4" fill="#f97316"/><rect x="446.1" y="177.3" width="11.2" height="26.7" rx="4" fill="#0f766e"/><rect x="465.4" y="171.3" width="11.2" height="2.5" rx="4" fill="#f97316"/><rect x="465.4" y="173.7" width="11.2" height="30.3" rx="4" fill="#0f766e"/><rect x="484.6" y="190.1" width="11.2" height="1.5" rx="4" fill="#f97316"/><rect x="484.6" y="191.6" width="11.2" height="12.4" rx="4" fill="#0f766e"/><rect x="503.9" y="135.1" width="11.2" height="3.4" rx="4" fill="#f97316"/><rect x="503.9" y="138.5" width="11.2" height="65.5" rx="4" fill="#0f766e"/><text x="509.5" y="232" text-anchor="middle" fill="#667085" font-size="11">05-27</text><rect x="523.1" y="174.2" width="11.2" height="3.5" rx="4" fill="#f97316"/><rect x="523.1" y="177.7" width="11.2" height="26.3" rx="4" fill="#0f766e"/><rect x="542.4" y="167.6" width="11.2" height="4.0" rx="4" fill="#f97316"/><rect x="542.4" y="171.5" width="11.2" height="32.5" rx="4" fill="#0f766e"/><rect x="561.6" y="114.3" width="11.2" height="4.2" rx="4" fill="#f97316"/><rect x="561.6" y="118.5" width="11.2" height="85.5" rx="4" fill="#0f766e"/><rect x="580.8" y="167.5" width="11.2" height="2.3" rx="4" fill="#f97316"/><rect x="580.8" y="169.8" width="11.2" height="34.2" rx="4" fill="#0f766e"/><text x="586.5" y="232" text-anchor="middle" fill="#667085" font-size="11">05-31</text><rect x="600.1" y="181.2" width="11.2" height="4.2" rx="4" fill="#f97316"/><rect x="600.1" y="185.4" width="11.2" height="18.6" rx="4" fill="#0f766e"/><rect x="619.3" y="172.0" width="11.2" height="4.4" rx="4" fill="#f97316"/><rect x="619.3" y="176.4" width="11.2" height="27.6" rx="4" fill="#0f766e"/><rect x="638.6" y="169.3" width="11.2" height="6.2" rx="4" fill="#f97316"/><rect x="638.6" y="175.5" width="11.2" height="28.5" rx="4" fill="#0f766e"/><rect x="657.8" y="199.5" width="11.2" height="0.9" rx="4" fill="#f97316"/><rect x="657.8" y="200.4" width="11.2" height="3.6" rx="4" fill="#0f766e"/><text x="663.4" y="232" text-anchor="middle" fill="#667085" font-size="11">06-04</text><rect x="677.1" y="176.8" width="11.2" height="12.3" rx="4" fill="#f97316"/><rect x="677.1" y="189.1" width="11.2" height="14.9" rx="4" fill="#0f766e"/><rect x="696.3" y="178.4" width="11.2" height="2.2" rx="4" fill="#f97316"/><rect x="696.3" y="180.6" width="11.2" height="23.4" rx="4" fill="#0f766e"/><rect x="715.6" y="179.0" width="11.2" height="3.8" rx="4" fill="#f97316"/><rect x="715.6" y="182.8" width="11.2" height="21.2" rx="4" fill="#0f766e"/><rect x="734.8" y="191.7" width="11.2" height="4.6" rx="4" fill="#f97316"/><rect x="734.8" y="196.3" width="11.2" height="7.7" rx="4" fill="#0f766e"/><text x="740.4" y="232" text-anchor="middle" fill="#667085" font-size="11">06-08</text><rect x="754.0" y="178.2" width="11.2" height="6.2" rx="4" fill="#f97316"/><rect x="754.0" y="184.4" width="11.2" height="19.6" rx="4" fill="#0f766e"/><rect x="773.3" y="191.7" width="11.2" height="3.1" rx="4" fill="#f97316"/><rect x="773.3" y="194.8" width="11.2" height="9.2" rx="4" fill="#0f766e"/><rect x="792.5" y="111.3" width="11.2" height="28.5" rx="4" fill="#f97316"/><rect x="792.5" y="139.7" width="11.2" height="64.3" rx="4" fill="#0f766e"/><rect x="811.8" y="181.8" width="11.2" height="2.4" rx="4" fill="#f97316"/><rect x="811.8" y="184.3" width="11.2" height="19.7" rx="4" fill="#0f766e"/><text x="817.4" y="232" text-anchor="middle" fill="#667085" font-size="11">06-12</text><rect x="831.0" y="173.6" width="11.2" height="6.7" rx="4" fill="#f97316"/><rect x="831.0" y="180.3" width="11.2" height="23.7" rx="4" fill="#0f766e"/><rect x="850.3" y="176.5" width="11.2" height="6.8" rx="4" fill="#f97316"/><rect x="850.3" y="183.3" width="11.2" height="20.7" rx="4" fill="#0f766e"/><rect x="869.5" y="163.9" width="11.2" height="5.2" rx="4" fill="#f97316"/><rect x="869.5" y="169.1" width="11.2" height="34.9" rx="4" fill="#0f766e"/><rect x="888.8" y="158.9" width="11.2" height="7.4" rx="4" fill="#f97316"/><rect x="888.8" y="166.3" width="11.2" height="37.7" rx="4" fill="#0f766e"/><text x="894.4" y="232" text-anchor="middle" fill="#667085" font-size="11">06-16</text></svg></div>
+        <div class="legend">
+          <span><i class="swatch download"></i>Download or total usage</span>
+          <span><i class="swatch upload"></i>Upload</span>
+        </div>
+      </article>
+      <article class="chart-panel">
+        <div class="section-head">
+          <h2>Weekly</h2>
+          <div class="note">ISO week totals</div>
+        </div>
+        <div class="chart"><svg viewBox="0 0 920 250" role="img" aria-label="Weekly usage chart"><rect width="920" height="250" rx="8" fill="#ffffff"/><line x1="42" y1="18.0" x2="900" y2="18.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="22.0" text-anchor="end" fill="#667085" font-size="11">239 GB</text><line x1="42" y1="80.0" x2="900" y2="80.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="84.0" text-anchor="end" fill="#667085" font-size="11">159 GB</text><line x1="42" y1="142.0" x2="900" y2="142.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="146.0" text-anchor="end" fill="#667085" font-size="11">79.7 GB</text><line x1="42" y1="204.0" x2="900" y2="204.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="208.0" text-anchor="end" fill="#667085" font-size="11">0 B</text><line x1="42" y1="204" x2="900" y2="204" stroke="#e5e7eb" stroke-width="1"/><rect x="42.0" y="203.3" width="46.1" height="0.3" rx="4" fill="#f97316"/><rect x="42.0" y="203.6" width="46.1" height="0.4" rx="4" fill="#0f766e"/><text x="65.1" y="232" text-anchor="middle" fill="#667085" font-size="11">W10 2026</text><rect x="96.1" y="135.3" width="46.1" height="14.5" rx="4" fill="#f97316"/><rect x="96.1" y="149.8" width="46.1" height="54.2" rx="4" fill="#0f766e"/><text x="119.2" y="232" text-anchor="middle" fill="#667085" font-size="11">W11 2026</text><rect x="150.2" y="119.1" width="46.1" height="9.3" rx="4" fill="#f97316"/><rect x="150.2" y="128.4" width="46.1" height="75.6" rx="4" fill="#0f766e"/><text x="173.3" y="232" text-anchor="middle" fill="#667085" font-size="11">W12 2026</text><rect x="204.4" y="150.2" width="46.1" height="7.7" rx="4" fill="#f97316"/><rect x="204.4" y="157.9" width="46.1" height="46.1" rx="4" fill="#0f766e"/><text x="227.4" y="232" text-anchor="middle" fill="#667085" font-size="11">W13 2026</text><rect x="258.5" y="140.3" width="46.1" height="6.7" rx="4" fill="#f97316"/><rect x="258.5" y="147.0" width="46.1" height="57.0" rx="4" fill="#0f766e"/><text x="281.6" y="232" text-anchor="middle" fill="#667085" font-size="11">W14 2026</text><rect x="312.6" y="151.3" width="46.1" height="5.8" rx="4" fill="#f97316"/><rect x="312.6" y="157.1" width="46.1" height="46.9" rx="4" fill="#0f766e"/><text x="335.7" y="232" text-anchor="middle" fill="#667085" font-size="11">W15 2026</text><rect x="366.8" y="136.0" width="46.1" height="7.0" rx="4" fill="#f97316"/><rect x="366.8" y="143.0" width="46.1" height="61.0" rx="4" fill="#0f766e"/><text x="389.8" y="232" text-anchor="middle" fill="#667085" font-size="11">W16 2026</text><rect x="420.9" y="201.3" width="46.1" height="0.4" rx="4" fill="#f97316"/><rect x="420.9" y="201.7" width="46.1" height="2.3" rx="4" fill="#0f766e"/><text x="443.9" y="232" text-anchor="middle" fill="#667085" font-size="11">W17 2026</text><rect x="475.0" y="88.1" width="46.1" height="10.4" rx="4" fill="#f97316"/><rect x="475.0" y="98.4" width="46.1" height="105.6" rx="4" fill="#0f766e"/><text x="498.1" y="232" text-anchor="middle" fill="#667085" font-size="11">W18 2026</text><rect x="529.1" y="18.0" width="46.1" height="12.5" rx="4" fill="#f97316"/><rect x="529.1" y="30.5" width="46.1" height="173.5" rx="4" fill="#0f766e"/><text x="552.2" y="232" text-anchor="middle" fill="#667085" font-size="11">W19 2026</text><rect x="583.2" y="19.2" width="46.1" height="16.8" rx="4" fill="#f97316"/><rect x="583.2" y="36.0" width="46.1" height="168.0" rx="4" fill="#0f766e"/><text x="606.3" y="232" text-anchor="middle" fill="#667085" font-size="11">W20 2026</text><rect x="637.4" y="132.2" width="46.1" height="9.2" rx="4" fill="#f97316"/><rect x="637.4" y="141.3" width="46.1" height="62.7" rx="4" fill="#0f766e"/><text x="660.4" y="232" text-anchor="middle" fill="#667085" font-size="11">W21 2026</text><rect x="691.5" y="72.5" width="46.1" height="9.1" rx="4" fill="#f97316"/><rect x="691.5" y="81.6" width="46.1" height="122.4" rx="4" fill="#0f766e"/><text x="714.6" y="232" text-anchor="middle" fill="#667085" font-size="11">W22 2026</text><rect x="745.6" y="130.6" width="46.1" height="14.5" rx="4" fill="#f97316"/><rect x="745.6" y="145.2" width="46.1" height="58.8" rx="4" fill="#0f766e"/><text x="768.7" y="232" text-anchor="middle" fill="#667085" font-size="11">W23 2026</text><rect x="799.8" y="108.7" width="46.1" height="24.9" rx="4" fill="#f97316"/><rect x="799.8" y="133.6" width="46.1" height="70.4" rx="4" fill="#0f766e"/><text x="822.8" y="232" text-anchor="middle" fill="#667085" font-size="11">W24 2026</text><rect x="853.9" y="167.6" width="46.1" height="5.4" rx="4" fill="#f97316"/><rect x="853.9" y="173.0" width="46.1" height="31.0" rx="4" fill="#0f766e"/><text x="876.9" y="232" text-anchor="middle" fill="#667085" font-size="11">W25 2026</text></svg></div>
+      </article>
+      <article class="chart-panel">
+        <div class="section-head">
+          <h2>Monthly</h2>
+          <div class="note">Month totals</div>
+        </div>
+        <div class="chart"><svg viewBox="0 0 920 250" role="img" aria-label="Monthly usage chart"><rect width="920" height="250" rx="8" fill="#ffffff"/><line x1="42" y1="18.0" x2="900" y2="18.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="22.0" text-anchor="end" fill="#667085" font-size="11">887 GB</text><line x1="42" y1="80.0" x2="900" y2="80.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="84.0" text-anchor="end" fill="#667085" font-size="11">591 GB</text><line x1="42" y1="142.0" x2="900" y2="142.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="146.0" text-anchor="end" fill="#667085" font-size="11">296 GB</text><line x1="42" y1="204.0" x2="900" y2="204.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="208.0" text-anchor="end" fill="#667085" font-size="11">0 B</text><line x1="42" y1="204" x2="900" y2="204" stroke="#e5e7eb" stroke-width="1"/><rect x="42.0" y="143.5" width="208.5" height="8.9" rx="4" fill="#f97316"/><rect x="42.0" y="152.4" width="208.5" height="51.6" rx="4" fill="#0f766e"/><text x="146.2" y="232" text-anchor="middle" fill="#667085" font-size="11">Mar 2026</text><rect x="258.5" y="158.0" width="208.5" height="5.1" rx="4" fill="#f97316"/><rect x="258.5" y="163.1" width="208.5" height="40.9" rx="4" fill="#0f766e"/><text x="362.8" y="232" text-anchor="middle" fill="#667085" font-size="11">Apr 2026</text><rect x="475.0" y="18.0" width="208.5" height="15.6" rx="4" fill="#f97316"/><rect x="475.0" y="33.6" width="208.5" height="170.4" rx="4" fill="#0f766e"/><text x="579.2" y="232" text-anchor="middle" fill="#667085" font-size="11">May 2026</text><rect x="691.5" y="148.7" width="208.5" height="12.1" rx="4" fill="#f97316"/><rect x="691.5" y="160.8" width="208.5" height="43.2" rx="4" fill="#0f766e"/><text x="795.8" y="232" text-anchor="middle" fill="#667085" font-size="11">Jun 2026</text></svg></div>
+      </article>
+      <article class="chart-panel">
+        <div class="section-head">
+          <h2>Yearly</h2>
+          <div class="note">Overall by year</div>
+        </div>
+        <div class="chart"><svg viewBox="0 0 920 250" role="img" aria-label="Yearly usage chart"><rect width="920" height="250" rx="8" fill="#ffffff"/><line x1="42" y1="18.0" x2="900" y2="18.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="22.0" text-anchor="end" fill="#667085" font-size="11">1.62 TB</text><line x1="42" y1="80.0" x2="900" y2="80.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="84.0" text-anchor="end" fill="#667085" font-size="11">1.08 TB</text><line x1="42" y1="142.0" x2="900" y2="142.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="146.0" text-anchor="end" fill="#667085" font-size="11">553 GB</text><line x1="42" y1="204.0" x2="900" y2="204.0" stroke="#e5e7eb" stroke-width="1"/><text x="32" y="208.0" text-anchor="end" fill="#667085" font-size="11">0 B</text><line x1="42" y1="204" x2="900" y2="204" stroke="#e5e7eb" stroke-width="1"/><rect x="42.0" y="18.0" width="858.0" height="22.3" rx="4" fill="#f97316"/><rect x="42.0" y="40.3" width="858.0" height="163.7" rx="4" fill="#0f766e"/><text x="471.0" y="232" text-anchor="middle" fill="#667085" font-size="11">2026</text></svg></div>
+      </article>
+      <article class="chart-panel">
+        <div class="section-head">
+          <h2>API Trend</h2>
+          <div class="note">Last 72 successful samples</div>
+        </div>
+        <div class="chart"><svg viewBox="0 0 920 260" role="img" aria-label="Usage history chart"><rect width="920" height="260" rx="8" fill="#ffffff"/><text x="460.0" y="130.0" text-anchor="middle" fill="#667085" font-size="15">Trend appears after two successful API samples</text></svg></div>
+      </article>
+    </section>
+
+    <section class="split-grid">
+      <article class="table-panel">
+        <div class="section-head">
+          <h2>Top Usage Days</h2>
+          <div class="note">Highest total traffic</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Download</th>
+              <th>Upload</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody><tr><td>2026-05-14</td><td>95.1 GB</td><td>7.01 GB</td><td>102 GB</td></tr>
+<tr><td>2026-05-03</td><td>83.9 GB</td><td>3.65 GB</td><td>87.5 GB</td></tr>
+<tr><td>2026-05-08</td><td>73.8 GB</td><td>3.18 GB</td><td>77.0 GB</td></tr>
+<tr><td>2026-05-07</td><td>69.1 GB</td><td>4.90 GB</td><td>74.0 GB</td></tr>
+<tr><td>2026-05-12</td><td>65.2 GB</td><td>3.74 GB</td><td>68.9 GB</td></tr>
+<tr><td>2026-05-02</td><td>50.3 GB</td><td>8.44 GB</td><td>58.7 GB</td></tr>
+<tr><td>2026-06-11</td><td>35.3 GB</td><td>15.6 GB</td><td>50.9 GB</td></tr>
+<tr><td>2026-05-30</td><td>46.9 GB</td><td>2.31 GB</td><td>49.2 GB</td></tr></tbody>
+        </table>
+      </article>
+
+      <article class="table-panel">
+        <div class="section-head">
+          <h2>Recent API Samples</h2>
+          <div class="note">Newest first</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Period</th>
+              <th>Total used</th>
+              <th>Status</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody><tr><td>2026-06-18T20:38:07+05:30</td><td>2025-12-31 to 2026-06-18</td><td>Unavailable</td><td>HTTP 200</td><td>225 ms</td></tr>
+<tr><td>2026-06-18T20:35:31+05:30</td><td>2025-12-31 to 2026-06-18</td><td>Unavailable</td><td>HTTP 200</td><td>195 ms</td></tr></tbody>
+        </table>
+      </article>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Recognized API Fields</h2>
+        <div class="note">Useful values detected in the response</div>
+      </div>
+      <div class="field-grid"><article class="field-card"><span>Data downloaded</span><strong>20.7 GB</strong><small>data[0].downloaded</small></article>
+<article class="field-card"><span>Data uploaded</span><strong>4.07 GB</strong><small>data[0].uploaded</small></article></div>
+    </section>
+
+    <section class="section">
+      <details>
+        <summary>Latest raw API response</summary>
+        <pre>{
+  &quot;message&quot;: &quot;Raw API response was omitted.&quot;
+}</pre>
+      </details>
+    </section>
+
+    <footer>
+      JSON file: <code>/Users/vputra/Documents/Codex/2026-06-18/create-a-python-code-that-runs/outputs/broadband_usage.json</code>. Authorization and mobile number are not written into this dashboard by the script.
+    </footer>
+  </main>
+</body>
+</html>

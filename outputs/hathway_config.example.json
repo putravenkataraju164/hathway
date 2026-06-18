@@ -1,0 +1,8 @@
+{
+  "authorization": "paste_hathway_authorization_token_here",
+  "account_no": "paste_account_number_here",
+  "registered_mobile_no": "paste_registered_mobile_number_here",
+  "login_device": "web",
+  "timezone": "Asia/Kolkata",
+  "date_mode": "year-to-now"
+}

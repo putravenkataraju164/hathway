@@ -1,0 +1,9 @@
+.DS_Store
+__pycache__/
+*.pyc
+*.log
+*.err.log
+
+# Local-only credentials. Use GitHub Actions secrets instead.
+outputs/hathway_config.json
+
